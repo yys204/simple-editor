@@ -6,6 +6,7 @@ import Antd from "ant-design-vue";
 import "ant-design-vue/dist/antd.css";
 import "ant-design-vue/dist/antd.dark.css";
 import router from "./router";
+import "./userWorker";
 
 const app = createApp(App);
 
