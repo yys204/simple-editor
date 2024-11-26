@@ -10,7 +10,7 @@
       height: 100%;
     "
   >
-    hello-world
+    hello-world,my simple editor in the most
   </div>
 </template>
 

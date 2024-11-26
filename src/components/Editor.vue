@@ -1,68 +1,79 @@
 <template>
   <div class="flex w-full h-full">
-    <div class="w-1/3 h-full">
-      <div class="w-full h-[32px] flex justify-between">
-        <a-space :size="0">
-          <template #split>
-            <a-divider type="vertical" />
-          </template>
-          <a-button
-            type="link"
-            @click="changeEditor('template')"
-            class="text-[16px]"
+    <splitpanes
+      class="w-full h-full default-theme"
+      :push-other-panes="false"
+      @mousedown="handleMouseDown"
+      @mouseup="handleMouseUp"
+    >
+      <pane :size="33">
+        <div class="w-full h-full">
+          <div class="w-full h-[32px] flex justify-between">
+            <a-space :size="0">
+              <template #split>
+                <a-divider type="vertical" />
+              </template>
+              <a-button
+                type="link"
+                @click="changeEditor('template')"
+                class="text-[16px]"
+              >
+                template
+              </a-button>
+              <a-button
+                type="link"
+                @click="changeEditor('script')"
+                class="text-[16px]"
+              >
+                script
+              </a-button>
+            </a-space>
+            <a-space :size="0">
+              <template #split>
+                <a-divider type="vertical" />
+              </template>
+              <a-button type="link" @click="handleFormat"
+                ><Brackets :size="16"
+              /></a-button>
+              <a-button type="link"><Undo2 :size="16" /></a-button>
+              <a-button type="link" @click="handlePlay"
+                ><Play :size="16"
+              /></a-button>
+            </a-space>
+          </div>
+          <div
+            class="w-full h-[calc(100%-32px)]"
+            ref="monacoElTemplate"
+            v-show="currentEditor === 'template'"
+          ></div>
+          <div
+            class="w-full h-[calc(100%-32px)]"
+            ref="monacoElScript"
+            v-show="currentEditor === 'script'"
+          ></div>
+        </div>
+      </pane>
+      <pane>
+        <div class="w-full h-full">
+          <iframe
+            ref="editorIframe"
+            frameborder="0"
+            style="height: 100%; width: 100%"
+            allow="geolocation *;"
+            :src="iframeUrl"
           >
-            template
-          </a-button>
-          <a-button
-            type="link"
-            @click="changeEditor('script')"
-            class="text-[16px]"
-          >
-            script
-          </a-button>
-        </a-space>
-        <a-space :size="0">
-          <template #split>
-            <a-divider type="vertical" />
-          </template>
-          <a-button type="link" @click="handleFormat"
-            ><Brackets :size="16"
-          /></a-button>
-          <a-button type="link"><Undo2 :size="16" /></a-button>
-          <a-button type="link" @click="handlePlay"
-            ><Play :size="16"
-          /></a-button>
-        </a-space>
-      </div>
-      <div
-        class="w-full h-[calc(100%-32px)]"
-        ref="monacoElTemplate"
-        v-show="currentEditor === 'template'"
-      ></div>
-      <div
-        class="w-full h-[calc(100%-32px)]"
-        ref="monacoElScript"
-        v-show="currentEditor === 'script'"
-      ></div>
-    </div>
-    <div class="w-2/3 h-full">
-      <iframe
-        ref="editorIframe"
-        frameborder="0"
-        style="height: 100%; width: 100%"
-        allow="geolocation *;"
-        :src="iframeUrl"
-      >
-      </iframe>
-    </div>
+          </iframe>
+        </div>
+      </pane>
+    </splitpanes>
   </div>
 </template>
 <script setup>
 import { ref, onMounted, onUnmounted, toRaw } from "vue";
 import { Undo2, Play, Brackets } from "lucide-vue-next";
 import * as monaco from "monaco-editor/esm/vs/editor/editor.api";
-// import { Splitpanes, Pane } from 'splitpanes'
-// import 'splitpanes/dist/splitpanes.css'
+import { Splitpanes, Pane } from "splitpanes";
+import "splitpanes/dist/splitpanes.css";
 
 const monacoElTemplate = ref(null);
 const monacoElScript = ref(null);
@@ -159,9 +170,29 @@ function handleFormat() {
 function changeEditor(val) {
   currentEditor.value = val;
 }
+function handleMouseDown() {
+  document.querySelector("iframe").style.pointerEvents = "none";
+}
+
+function handleMouseUp() {
+  document.querySelector("iframe").style.pointerEvents = "auto";
+}
 onUnmounted(() => {
   toRaw(editorTemplate).dispose();
   toRaw(editorScript).dispose();
 });
 </script>
-<style scoped></style>
+<style scoped>
+/* 遮罩层样式 */
+.iframe::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10;
+  background-color: rgba(255, 255, 255, 0); /* 透明背景 */
+  pointer-events: none; /* 不捕获鼠标事件 */
+}
+</style>
